@@ -1,0 +1,38 @@
+{
+  "name": "context-di",
+  "version": "1.0.0",
+  "description": "The Proxy context container that resolves dependencies and exposes them as context properties",
+  "keywords": [
+    "context",
+    "proxy",
+    "container",
+    "di"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/spamshaker/context-proxy.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "main": "index.js",
+  "module": "index.ts",
+  "types": "types.d.ts",
+  "files": [
+    "index.ts",
+    "index.js",
+    "index.js.map",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "bun test --coverage"
+  },
+  "devDependencies": {
+    "@reduxjs/toolkit": "^2.8.2",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
