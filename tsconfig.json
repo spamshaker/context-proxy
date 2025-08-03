@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    // Environment setup & latest features
     "lib": [
       "ESNext"
     ],
@@ -8,16 +7,14 @@
     "module": "Preserve",
     "moduleDetection": "force",
     "jsx": "react-jsx",
-    "allowJs": true,
+    "allowJs": false,
     // Bundler mode
     "moduleResolution": "bundler",
     "verbatimModuleSyntax": true,
     "noEmit": true,
     "types": [
       "bun",
-      "vitest/globals"
     ],
-    // Best practices
     "strict": true,
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,

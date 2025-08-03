@@ -1,35 +1,44 @@
-const createContextContainer = <TContext extends object,
-  P extends keyof TContext = keyof TContext,
-  T extends { [K in P]: (ctx: TContext) => TContext[K] } = { [K in P]: (ctx: TContext) => TContext[K] }>(provider: T) => {
-
-  const isProperty = (p: unknown): p is P => {
-    return typeof p === 'string' && p in provider;
-  };
-
-  const chain = new Set<P>();
-
-  const contextHandler: ProxyHandler<TContext> = {
-    get(target: TContext, p: unknown) {
-      if (!isProperty(p)) {
-        throw new Error(`Missing provider for property: ${p}`);
+const createHandler = <T>(getInstance: (name: keyof T) => T[keyof T]) => {
+  const resolutionStack = new Set<keyof T>();
+  return {
+    get(target: T, property: keyof T) {
+      if (resolutionStack.has(property)) {
+        throw new Error(`Circular dependencies for ${String(property)}`, {
+          cause:
+            `Chain: ${resolutionStack.values().toArray().join(' -> ')} => ${String(property)}`
+        });
       }
-      if (chain.has(p)) {
-        const path = chain.values().toArray().join(' -> ');
-        throw new Error(`Circular dependency detected while resolving property "${String(p)}"`,
-          { cause: `Dependency chain: ${path} -> ${String(p)}` }
-        );
+      resolutionStack.add(property);
+      if (!target[property]) {
+        target[property] = getInstance(property);
       }
-
-      if (!target[p]) {
-        chain.add(p);
-        target[p] = provider[p](contextProxy) as TContext[P];
-        chain.delete(p);
-      }
-      return target[p];
+      resolutionStack.delete(property);
+      return target[property];
     }
   };
-  const contextProxy = new Proxy({} as TContext, contextHandler);
-  return contextProxy;
 };
+
+const createContextPropertyProvider = <T extends Provider<any>>(objectProvider: T, ctxProvider: () => object) =>
+  <TName extends keyof T>(name: TName): ReturnType<T[TName]> => {
+    if (name in objectProvider && typeof objectProvider[name] === 'function') {
+      return objectProvider[name](ctxProvider());
+    }
+    throw new Error(`Expected provider.${String(name)} to be a function but was: ${typeof objectProvider[name]}`);
+  };
+
+type Provider<T> = {
+  [P in keyof T]: (ctx: T) => T[P];
+}
+
+const createContextContainer = <T extends object>(
+  provider: T extends Provider<infer X> ? Provider<X> : Provider<T>,
+  target: object = {}) => {
+
+  const ctxProvider = () => proxy;
+  const contextPropertyProvider = createContextPropertyProvider(provider, ctxProvider);
+  const proxy = new Proxy(target, createHandler(contextPropertyProvider as any));
+  return proxy as T extends Provider<infer R> ? R : T;
+};
+
 
 export default createContextContainer;
