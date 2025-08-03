@@ -1,6 +1,6 @@
 {
   "name": "context-di",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The Proxy context container that resolves dependencies and exposes them as context properties",
   "keywords": [
     "context",
